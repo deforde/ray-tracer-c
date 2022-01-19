@@ -1,5 +1,19 @@
+#include "util.h"
+
 #include <math.h>
+#include <stdint.h>
 #include <stdlib.h>
+
+void write_colour(FILE* image_file, colour_t pixel_color)
+{
+    uint32_t ir = (uint32_t)(255.999 * pixel_color.x);
+    uint32_t ig = (uint32_t)(255.999 * pixel_color.y);
+    uint32_t ib = (uint32_t)(255.999 * pixel_color.z);
+
+    char buf[128] = {0};
+    const size_t buf_len = snprintf(buf, sizeof(buf), "%u %u %u\n", ir, ig, ib);
+    fwrite(buf, buf_len, 1, image_file);
+}
 
 float random_f_mm(float min, float max)
 {

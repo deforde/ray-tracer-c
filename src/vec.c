@@ -150,7 +150,7 @@ vec_t vec_div_f(vec_t u, size_t n, ...)
 
 float vec_length(vec_t v)
 {
-    return sqrt(vec_length_squared(v));
+    return sqrtf(vec_length_squared(v));
 }
 
 float vec_length_squared(vec_t v)
@@ -251,29 +251,7 @@ vec_t vec_refract(vec_t uv, vec_t n, float etai_over_etat)
     vec_t b = VEC_ADD_V(uv, a);
 
     const vec_t r_out_perp = VEC_MUL_F(b, etai_over_etat);
-    const vec_t r_out_parallel = VEC_MUL_F(n, -sqrt(fabsf(1.0f - vec_length_squared(r_out_perp))));
+    const vec_t r_out_parallel = VEC_MUL_F(n, -sqrtf(fabsf(1.0f - vec_length_squared(r_out_perp))));
 
     return VEC_ADD_V(r_out_perp, r_out_parallel);
-}
-
-void write_colour(FILE* image_file, colour_t pixel_colour, size_t samples_per_pixel)
-{
-    float r = pixel_colour.x;
-    float g = pixel_colour.y;
-    float b = pixel_colour.z;
-
-    // Divide the color by the number of samples and gamma-correct for gamma=2.0.
-    const float scale = 1.0f / samples_per_pixel;
-    r = sqrt(scale * r);
-    g = sqrt(scale * g);
-    b = sqrt(scale * b);
-
-    const uint32_t ur = (uint32_t)(256 * clamp(r, 0.0f, 0.999f));
-    const uint32_t ug = (uint32_t)(256 * clamp(g, 0.0f, 0.999f));
-    const uint32_t ub = (uint32_t)(256 * clamp(b, 0.0f, 0.999f));
-
-    // Write the translated [0,255] value of each color component.
-    char buf[128] = {0};
-    const size_t buf_len = snprintf(buf, sizeof(buf), "%u %u %u\n", ur, ug, ub);
-    fwrite(buf, buf_len, 1, image_file);
 }

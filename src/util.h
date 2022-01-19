@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <stddef.h>
 
+#include "vec.h"
+
+void write_colour(FILE* image_file, colour_t pixel_color);
+
 float random_f_mm(float min, float max);
 float random_f();
 
