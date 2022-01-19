@@ -4,14 +4,23 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-void write_colour(FILE* image_file, colour_t pixel_color)
+void write_colour(FILE* image_file, colour_t pixel_color, size_t samples_per_pixel)
 {
-    uint32_t ir = (uint32_t)(255.999 * pixel_color.x);
-    uint32_t ig = (uint32_t)(255.999 * pixel_color.y);
-    uint32_t ib = (uint32_t)(255.999 * pixel_color.z);
+    float r = pixel_color.x;
+    float g = pixel_color.y;
+    float b = pixel_color.z;
+
+    const float scale = 1.0f / samples_per_pixel;
+    r *= scale;
+    g *= scale;
+    b *= scale;
+
+    const uint32_t ur = (uint32_t)(256 * clamp(r, 0.0f, 0.999f));
+    const uint32_t ug = (uint32_t)(256 * clamp(g, 0.0f, 0.999f));
+    const uint32_t ub = (uint32_t)(256 * clamp(b, 0.0f, 0.999f));
 
     char buf[128] = {0};
-    const size_t buf_len = snprintf(buf, sizeof(buf), "%u %u %u\n", ir, ig, ib);
+    const size_t buf_len = snprintf(buf, sizeof(buf), "%u %u %u\n", ur, ug, ub);
     fwrite(buf, buf_len, 1, image_file);
 }
 
