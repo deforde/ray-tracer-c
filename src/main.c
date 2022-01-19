@@ -14,12 +14,20 @@
 #include "util.h"
 #include "vec.h"
 
-colour_t ray_colour(ray_t r, hittable_list_t* world)
+colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
 {
+    colour_t zero_colour = { .x = 0, .y = 0, .z = 0 };
+    if(depth <= 0)
+        return zero_colour;
+
     hit_record_t rec;
-    if(hittable_list_hit(world, r, 0.0f, FLT_MAX, &rec)) {
-        colour_t c = { .x = 1, .y = 1, .z = 1 };
-        return VEC_MUL_F(VEC_ADD_V(rec.normal, c), 0.5f);
+    if(hittable_list_hit(world, r, 0.001f, FLT_MAX, &rec)) {
+        point_t target = VEC_ADD_V(rec.p, vec_random_in_hemisphere(rec.normal));
+        ray_t s = {
+            .orig = rec.p,
+            .dir = VEC_SUB_V(target, rec.p)
+        };
+        return VEC_MUL_F(ray_colour(s, world, depth - 1), 0.5f);
     }
     vec_t unit_dir = vec_unit(r.dir);
     const float t = 0.5f * (unit_dir.y + 1.0f);
@@ -35,6 +43,7 @@ int main()
     const int32_t image_width = 400;
     const int32_t image_height = (int32_t)(image_width / aspect_ratio);
     const size_t samples_per_pixel = 100;
+    const int32_t max_depth = 50;
 
     // World
     hittable_list_t world;
@@ -51,15 +60,6 @@ int main()
     // Camera
     camera_t cam;
     camera_init(&cam);
-    // const float viewport_height = 2.0f;
-    // const float viewport_width = aspect_ratio * viewport_height;
-    // const float focal_length = 1.0f;
-
-    // const point_t origin = { .x = 0, .y = 0, .z = 0 };
-    // const vec_t horizontal = { .x = viewport_width, .y = 0, .z = 0 };
-    // const vec_t vertical = { .x = 0, .y = viewport_height, .z = 0 };
-    // const vec_t focal_point = { .x = 0, .y = 0, .z = focal_length };
-    // const vec_t lower_left_corner = VEC_SUB_V(origin, VEC_DIV_F(horizontal, 2.0f), VEC_DIV_F(vertical, 2.0f), focal_point);
 
     // Render
     FILE* image_file = fopen("image.ppm", "w");
@@ -74,21 +74,12 @@ int main()
         printf("%3u%%\r", (uint32_t)(100.0f * (1.0f - (float)i / image_height)));
         fflush(stdout);
         for(int32_t j = 0; j < image_width; ++j) {
-            // const float u = (float)j / (image_width - 1);
-            // const float v = (float)i / (image_height - 1);
-            // ray_t r = {
-            //     .orig = origin,
-            //     .dir = VEC_SUB_V(VEC_ADD_V(lower_left_corner, VEC_MUL_F(horizontal, u), VEC_MUL_F(vertical, v)), origin)
-            // };
-            // colour_t pixel_colour = ray_colour(r, &world);
-            // write_colour(image_file, pixel_colour, 1);
-
             colour_t pixel_colour = { .x = 0, .y = 0, .z = 0 };
             for(size_t s = 0; s < samples_per_pixel; ++s) {
                 const float u = (j + random_f()) / (image_width - 1);
                 const float v = (i + random_f()) / (image_height - 1);
                 ray_t r = camera_get_ray(&cam, u, v);
-                pixel_colour = VEC_ADD_V(pixel_colour, ray_colour(r, &world));
+                pixel_colour = VEC_ADD_V(pixel_colour, ray_colour(r, &world, max_depth));
             }
             write_colour(image_file, pixel_colour, samples_per_pixel);
         }

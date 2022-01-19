@@ -11,9 +11,9 @@ void write_colour(FILE* image_file, colour_t pixel_color, size_t samples_per_pix
     float b = pixel_color.z;
 
     const float scale = 1.0f / samples_per_pixel;
-    r *= scale;
-    g *= scale;
-    b *= scale;
+    r = sqrt(scale * r);
+    g = sqrt(scale * g);
+    b = sqrt(scale * b);
 
     const uint32_t ur = (uint32_t)(256 * clamp(r, 0.0f, 0.999f));
     const uint32_t ug = (uint32_t)(256 * clamp(g, 0.0f, 0.999f));
