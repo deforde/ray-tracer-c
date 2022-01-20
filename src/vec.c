@@ -238,7 +238,7 @@ bool vec_near_zero(vec_t v)
 
 vec_t vec_reflect(vec_t v, vec_t n)
 {
-    vec_t a = VEC_MUL_F(n, 2, vec_dot(v, n));
+    vec_t a = VEC_MUL_F(n, 2.0f, vec_dot(v, n));
     return VEC_SUB_V(v, a);
 }
 

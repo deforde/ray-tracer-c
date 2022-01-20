@@ -1,6 +1,7 @@
 #ifndef __SPHERE_H__
 #define __SPHERE_H__
 
+#include "material.h"
 #include "hit_record.h"
 #include "ray.h"
 #include "vec.h"
@@ -8,6 +9,7 @@
 typedef struct {
     point_t centre;
     float radius;
+    material_t* material;
 } sphere_t;
 
 bool sphere_hit(void* object, ray_t r, float t_min, float t_max, hit_record_t* rec);

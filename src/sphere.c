@@ -29,6 +29,7 @@ bool sphere_hit(void* object, ray_t r, float t_min, float t_max, hit_record_t* r
     rec->p = ray_at(r, rec->t);
     const vec_t outward_normal = VEC_DIV_F(VEC_SUB_V(rec->p, sphere->centre), sphere->radius);
     set_face_normal(rec, r, outward_normal);
+    rec->material = sphere->material;
 
     return true;
 }
