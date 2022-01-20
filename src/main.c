@@ -7,6 +7,7 @@
 #include <math.h>
 
 #include "camera.h"
+#include "dielectric.h"
 #include "hittable.h"
 #include "hittable_list.h"
 #include "lambertian.h"
@@ -53,14 +54,18 @@ int main()
     const int32_t max_depth = 50;
 
     // Materials
-    lambertian_t lambertian_ground = { .albedo = { 0.8, 0.8, 0.0 } };
-    lambertian_t lambertian_centre = { .albedo = { 0.7, 0.3, 0.3 } };
-    metal_t metal_left = { .albedo = { 0.8, 0.8, 0.8 } };
-    metal_t metal_right = { .albedo = { 0.8, 0.6, 0.2 } };
+    lambertian_t lambertian_ground = { .albedo = { 0.8f, 0.8f, 0.0f } };
+    lambertian_t lambertian_centre = { .albedo = { 0.1f, 0.2f, 0.5f } };
+    // metal_t metal_left = { .albedo = { 0.8f, 0.8f, 0.8f }, .fuzz = 0.3f };
+    // dielectric_t dielectric_centre = { .ir = 1.5f };
+    dielectric_t dielectric_left = { .ir = 1.5f };
+    metal_t metal_right = { .albedo = { 0.8f, 0.6f, 0.2f }, .fuzz = 0.0f };
 
     material_t material_ground = { .object = &lambertian_ground, .scatter_func=lambertian_scatter };
     material_t material_centre = { .object = &lambertian_centre, .scatter_func=lambertian_scatter };
-    material_t material_left = { .object = &metal_left, .scatter_func=metal_scatter };
+    // material_t material_left = { .object = &metal_left, .scatter_func=metal_scatter };
+    // material_t material_centre = { .object = &dielectric_centre, .scatter_func=dielectric_scatter };
+    material_t material_left = { .object = &dielectric_left, .scatter_func=dielectric_scatter };
     material_t material_right = { .object = &metal_right, .scatter_func=metal_scatter };
 
     // Hittable Objects
@@ -73,6 +78,9 @@ int main()
     sphere_t sphere_2 = { .centre = {-1.0f, 0.0f, -1.0f }, .radius = 0.5f, .material= &material_left };
     hittable_t hittable_sphere_2 = { .object = &sphere_2, .hit_func = sphere_hit };
 
+    sphere_t sphere_2_inner = { .centre = {-1.0f, 0.0f, -1.0f }, .radius = -0.4f, .material= &material_left };
+    hittable_t hittable_sphere_2_inner = { .object = &sphere_2_inner, .hit_func = sphere_hit };
+
     sphere_t sphere_3 = { .centre = {1.0f, 0.0f, -1.0f }, .radius = 0.5f, .material= &material_right };
     hittable_t hittable_sphere_3 = { .object = &sphere_3, .hit_func = sphere_hit };
 
@@ -81,11 +89,18 @@ int main()
     hittable_list_add(&world, hittable_sphere_0);
     hittable_list_add(&world, hittable_sphere_1);
     hittable_list_add(&world, hittable_sphere_2);
+    hittable_list_add(&world, hittable_sphere_2_inner);
     hittable_list_add(&world, hittable_sphere_3);
 
     // Camera
+    const point_t lookfrom = {3,3,2};
+    const point_t lookat = {0,0,-1};
+    const vec_t vup = {0,1,0};
+    const float vfov = 20.0f;
+    const float dist_to_focus = vec_length(VEC_SUB_V(lookfrom, lookat));
+    const float aperture = 2.0f;
     camera_t cam;
-    camera_init(&cam);
+    camera_init(&cam, lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus);
 
     // Render
     FILE* image_file = fopen("image.ppm", "w");
