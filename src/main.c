@@ -18,6 +18,8 @@
 #include "util.h"
 #include "vec.h"
 
+#define TOTAL_NUM_RANDOM_SPHERES 23 * 23
+
 colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
 {
     colour_t zero_colour = { .x = 0, .y = 0, .z = 0 };
@@ -47,58 +49,137 @@ colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
 int main()
 {
     // Image
-    const float aspect_ratio = 16.0f / 9.0f;
-    const int32_t image_width = 400;
+    const float aspect_ratio = 3.0f / 2.0f;
+    const int32_t image_width = 1200;
     const int32_t image_height = (int32_t)(image_width / aspect_ratio);
-    const size_t samples_per_pixel = 100;
+    const size_t samples_per_pixel = 500;
     const int32_t max_depth = 50;
-
-    // Materials
-    lambertian_t lambertian_ground = { .albedo = { 0.8f, 0.8f, 0.0f } };
-    lambertian_t lambertian_centre = { .albedo = { 0.1f, 0.2f, 0.5f } };
-    // metal_t metal_left = { .albedo = { 0.8f, 0.8f, 0.8f }, .fuzz = 0.3f };
-    // dielectric_t dielectric_centre = { .ir = 1.5f };
-    dielectric_t dielectric_left = { .ir = 1.5f };
-    metal_t metal_right = { .albedo = { 0.8f, 0.6f, 0.2f }, .fuzz = 0.0f };
-
-    material_t material_ground = { .object = &lambertian_ground, .scatter_func=lambertian_scatter };
-    material_t material_centre = { .object = &lambertian_centre, .scatter_func=lambertian_scatter };
-    // material_t material_left = { .object = &metal_left, .scatter_func=metal_scatter };
-    // material_t material_centre = { .object = &dielectric_centre, .scatter_func=dielectric_scatter };
-    material_t material_left = { .object = &dielectric_left, .scatter_func=dielectric_scatter };
-    material_t material_right = { .object = &metal_right, .scatter_func=metal_scatter };
-
-    // Hittable Objects
-    sphere_t sphere_0 = { .centre = {0.0f, -100.5f, -1.0f }, .radius = 100.0f, .material = &material_ground };
-    hittable_t hittable_sphere_0 = { .object = &sphere_0, .hit_func = sphere_hit };
-
-    sphere_t sphere_1 = { .centre = {0.0f, 0.0f, -1.0f }, .radius = 0.5f, .material= &material_centre };
-    hittable_t hittable_sphere_1 = { .object = &sphere_1, .hit_func = sphere_hit };
-
-    sphere_t sphere_2 = { .centre = {-1.0f, 0.0f, -1.0f }, .radius = 0.5f, .material= &material_left };
-    hittable_t hittable_sphere_2 = { .object = &sphere_2, .hit_func = sphere_hit };
-
-    sphere_t sphere_2_inner = { .centre = {-1.0f, 0.0f, -1.0f }, .radius = -0.4f, .material= &material_left };
-    hittable_t hittable_sphere_2_inner = { .object = &sphere_2_inner, .hit_func = sphere_hit };
-
-    sphere_t sphere_3 = { .centre = {1.0f, 0.0f, -1.0f }, .radius = 0.5f, .material= &material_right };
-    hittable_t hittable_sphere_3 = { .object = &sphere_3, .hit_func = sphere_hit };
 
     // World
     hittable_list_t world;
-    hittable_list_add(&world, hittable_sphere_0);
-    hittable_list_add(&world, hittable_sphere_1);
-    hittable_list_add(&world, hittable_sphere_2);
-    hittable_list_add(&world, hittable_sphere_2_inner);
-    hittable_list_add(&world, hittable_sphere_3);
+    world.n_objects = 0;
+
+    lambertian_t lambertian_ground = { .albedo = { 0.5f, 0.5f, 0.5f } };
+    material_t material_ground = { .object = &lambertian_ground, .scatter_func = lambertian_scatter };
+    sphere_t sphere_ground = { .centre = { 0.0f, -1000.0f, 0.0f }, .radius = 1000.0f, .material = &material_ground };
+    hittable_t hittable_ground = { .object = &sphere_ground, .hit_func = sphere_hit };
+    hittable_list_add(&world, hittable_ground);
+
+    dielectric_t dielectric_obj_1 = { .ir = 1.5f };
+    material_t material_obj_1 = { .object = &dielectric_obj_1, .scatter_func = dielectric_scatter };
+    sphere_t sphere_obj_1 = { .centre = { 0.0f, 1.0f, 0.0f }, .radius = 1.0f, .material = &material_obj_1 };
+    hittable_t hittable_obj_1 = { .object = &sphere_obj_1, .hit_func = sphere_hit };
+    hittable_list_add(&world, hittable_obj_1);
+
+    lambertian_t lambertian_obj_2 = { .albedo = { 0.4f, 0.2f, 0.1f } };
+    material_t material_obj_2 = { .object = &lambertian_obj_2, .scatter_func = lambertian_scatter };
+    sphere_t sphere_obj_2 = { .centre = { -4.0f, 1.0f, 0.0f }, .radius = 1.0f, .material = &material_obj_2 };
+    hittable_t hittable_obj_2 = { .object = &sphere_obj_2, .hit_func = sphere_hit };
+    hittable_list_add(&world, hittable_obj_2);
+
+    metal_t metal_obj_3 = { .albedo = { 0.7f, 0.6f, 0.5f }, .fuzz = 0.0f };
+    material_t material_obj_3 = { .object = &metal_obj_3, .scatter_func = metal_scatter };
+    sphere_t sphere_obj_3 = { .centre = { 4.0f, 1.0f, 0.0f }, .radius = 1.0f, .material = &material_obj_3 };
+    hittable_t hittable_obj_3 = { .object = &sphere_obj_3, .hit_func = sphere_hit };
+    hittable_list_add(&world, hittable_obj_3);
+
+    lambertian_t random_lambertians[TOTAL_NUM_RANDOM_SPHERES];
+    size_t n_random_lambertians = 0;
+    metal_t random_metals[TOTAL_NUM_RANDOM_SPHERES];
+    size_t n_random_metals = 0;
+    dielectric_t random_dielectrics[TOTAL_NUM_RANDOM_SPHERES];
+    size_t n_random_dielectrics = 0;
+    material_t random_materials[TOTAL_NUM_RANDOM_SPHERES];
+    size_t n_random_materials = 0;
+    sphere_t random_spheres[TOTAL_NUM_RANDOM_SPHERES];
+    size_t n_random_spheres = 0;
+    hittable_t random_hittables[TOTAL_NUM_RANDOM_SPHERES];
+    size_t n_random_hittables = 0;
+
+    const int32_t random_sphere_idx_max = ((int32_t)sqrtf(TOTAL_NUM_RANDOM_SPHERES) - 1) / 2;
+    const int32_t random_sphere_idx_min = -random_sphere_idx_max;
+    for(int32_t a = random_sphere_idx_min; a < random_sphere_idx_max; a++) {
+        for(int32_t b = random_sphere_idx_min; b < random_sphere_idx_max; b++) {
+            const float choose_mat = random_f();
+            const point_t centre = { .x = a + 0.9f * random_f(), .y = 0.2f, .z = b + 0.9f * random_f() };
+            const point_t p = { .x = 4.0f, .y = 0.2f, .z = 0.0f };
+
+            if(vec_length(VEC_SUB_V(centre, p)) > 0.9f) {
+                if (choose_mat < 0.8) {
+                    // diffuse
+                    random_lambertians[n_random_lambertians].albedo = VEC_MUL_V(vec_random(), vec_random());
+
+                    random_materials[n_random_materials].object = &random_lambertians[n_random_lambertians];
+                    random_materials[n_random_materials].scatter_func = lambertian_scatter;
+
+                    random_spheres[n_random_spheres].centre = centre;
+                    random_spheres[n_random_spheres].radius = 0.2f;
+                    random_spheres[n_random_spheres].material = &random_materials[n_random_materials];
+
+                    random_hittables[n_random_hittables].object = &random_spheres[n_random_spheres];
+                    random_hittables[n_random_hittables].hit_func = sphere_hit;
+
+                    hittable_list_add(&world, random_hittables[n_random_hittables]);
+
+                    ++n_random_lambertians;
+                    ++n_random_materials;
+                    ++n_random_spheres;
+                    ++n_random_hittables;
+                }
+                else if(choose_mat < 0.95f) {
+                    // metal
+                    random_metals[n_random_metals].albedo = vec_random_mm(0.5f, 1.0f);
+                    random_metals[n_random_metals].fuzz = random_f_mm(0.0f, 0.5f);
+
+                    random_materials[n_random_materials].object = &random_metals[n_random_metals];
+                    random_materials[n_random_materials].scatter_func = metal_scatter;
+
+                    random_spheres[n_random_spheres].centre = centre;
+                    random_spheres[n_random_spheres].radius = 0.2f;
+                    random_spheres[n_random_spheres].material = &random_materials[n_random_materials];
+
+                    random_hittables[n_random_hittables].object = &random_spheres[n_random_spheres];
+                    random_hittables[n_random_hittables].hit_func = sphere_hit;
+
+                    hittable_list_add(&world, random_hittables[n_random_hittables]);
+
+                    ++n_random_metals;
+                    ++n_random_materials;
+                    ++n_random_spheres;
+                    ++n_random_hittables;
+                }
+                else {
+                    // glass
+                    random_dielectrics[n_random_dielectrics].ir = 1.5f;
+
+                    random_materials[n_random_materials].object = &random_dielectrics[n_random_dielectrics];
+                    random_materials[n_random_materials].scatter_func = dielectric_scatter;
+
+                    random_spheres[n_random_spheres].centre = centre;
+                    random_spheres[n_random_spheres].radius = 0.2f;
+                    random_spheres[n_random_spheres].material = &random_materials[n_random_materials];
+
+                    random_hittables[n_random_hittables].object = &random_spheres[n_random_spheres];
+                    random_hittables[n_random_hittables].hit_func = sphere_hit;
+
+                    hittable_list_add(&world, random_hittables[n_random_hittables]);
+
+                    ++n_random_dielectrics;
+                    ++n_random_materials;
+                    ++n_random_spheres;
+                    ++n_random_hittables;
+                }
+            }
+        }
+    }
 
     // Camera
-    const point_t lookfrom = {3,3,2};
-    const point_t lookat = {0,0,-1};
+    const point_t lookfrom = {13,2,3};
+    const point_t lookat = {0,0,0};
     const vec_t vup = {0,1,0};
     const float vfov = 20.0f;
-    const float dist_to_focus = vec_length(VEC_SUB_V(lookfrom, lookat));
-    const float aperture = 2.0f;
+    const float dist_to_focus = 10.0f;
+    const float aperture = 0.1f;
     camera_t cam;
     camera_init(&cam, lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus);
 
@@ -109,7 +190,6 @@ int main()
     fwrite(buf, buf_len, 1, image_file);
     memset(buf, 0, sizeof(buf));
 
-    // Render
     printf("Rendering...\n");
     for(int32_t i = (image_height - 1); i >= 0; --i) {
         printf("%3u%%\r", (uint32_t)(100.0f * (1.0f - (float)i / image_height)));
