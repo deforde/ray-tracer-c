@@ -35,7 +35,6 @@ colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
             return VEC_MUL_V(attenuation, ray_colour(scattered, world, depth - 1));
         }
 
-        colour_t zero_colour = { .x = 0, .y = 0, .z = 0 };
         return zero_colour;
     }
 
