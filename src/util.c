@@ -26,7 +26,7 @@ void write_colour(FILE* image_file, colour_t pixel_color, size_t samples_per_pix
 
 float random_f_mm(float min, float max)
 {
-    const float f = (float)rand() / RAND_MAX;
+    float f = rand() / (float)RAND_MAX;
     return (max - min) * f + min;
 }
 

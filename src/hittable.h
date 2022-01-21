@@ -1,7 +1,7 @@
 #ifndef __HITTABLE_H__
 #define __HITTABLE_H__
 
-#include <stddef.h>
+#include <stdbool.h>
 
 #include "hit_record.h"
 #include "ray.h"

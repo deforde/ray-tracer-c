@@ -1,6 +1,8 @@
 #ifndef __MATERIAL_H__
 #define __MATERIAL_H__
 
+#include <stdbool.h>
+
 #include "hit_record.h"
 #include "ray.h"
 #include "vec.h"

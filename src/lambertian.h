@@ -1,6 +1,8 @@
 #ifndef __LAMBERTIAN_H__
 #define __LAMBERTIAN_H__
 
+#include <stdbool.h>
+
 #include "hit_record.h"
 #include "material.h"
 #include "ray.h"

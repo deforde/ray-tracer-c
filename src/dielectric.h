@@ -1,6 +1,8 @@
 #ifndef __DIELECTRIC_H__
 #define __DIELECTRIC_H__
 
+#include <stdbool.h>
+
 #include "hit_record.h"
 #include "material.h"
 #include "ray.h"

@@ -31,7 +31,7 @@ bool dielectric_scatter(void* object, ray_t r_in, hit_record_t rec, colour_t* at
     const float sin_theta = sqrtf(1.0f - cos_theta * cos_theta);
 
     const bool cannot_refract = refraction_ratio * sin_theta > 1.0f;
-    vec_t dir = { .x = 0.0f, .y = 0.0f, .z = 0.0f };
+    vec_t dir;
     if (cannot_refract || reflectance(cos_theta, refraction_ratio) > random_f())
         dir = vec_reflect(unit_dir, rec.normal);
     else

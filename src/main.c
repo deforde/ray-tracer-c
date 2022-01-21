@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 #include <float.h>
@@ -8,6 +7,7 @@
 
 #include "camera.h"
 #include "dielectric.h"
+#include "hit_record.h"
 #include "hittable.h"
 #include "hittable_list.h"
 #include "lambertian.h"

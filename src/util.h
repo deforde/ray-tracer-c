@@ -2,7 +2,6 @@
 #define __UTIL_H__
 
 #include <stdio.h>
-#include <stddef.h>
 
 #include "vec.h"
 

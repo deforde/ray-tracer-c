@@ -1,6 +1,8 @@
 #ifndef __SPHERE_H__
 #define __SPHERE_H__
 
+#include <stdbool.h>
+
 #include "material.h"
 #include "hit_record.h"
 #include "hittable.h"
