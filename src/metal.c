@@ -1,5 +1,16 @@
 #include "metal.h"
 
+material_vtable_t metal_vtable = {
+    .scatter_func = metal_scatter
+};
+
+void metal_init(metal_t* metal, colour_t albedo, float fuzz)
+{
+    metal->material.vtable = &metal_vtable;
+    metal->albedo = albedo;
+    metal->fuzz = fuzz;
+}
+
 bool metal_scatter(void* object, ray_t r_in, hit_record_t rec, colour_t* attenuation, ray_t* scattered)
 {
     metal_t* metal = (metal_t*)object;

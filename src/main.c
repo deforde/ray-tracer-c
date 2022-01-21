@@ -18,7 +18,7 @@
 #include "util.h"
 #include "vec.h"
 
-#define TOTAL_NUM_RANDOM_SPHERES 23 * 23
+#define MAX_NUM_RANDOM_SPHERES 23 * 23
 
 colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
 {
@@ -31,7 +31,7 @@ colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
         ray_t scattered = { .orig = {0,0,0}, .dir = {0,0,0} };
         colour_t attenuation = { .x = 0, .y = 0, .z = 0 };
 
-        if(rec.material->scatter_func(rec.material->object, r, rec, &attenuation, &scattered)) {
+        if(material_scatter(rec.material, r, rec, &attenuation, &scattered)) {
             return VEC_MUL_V(attenuation, ray_colour(scattered, world, depth - 1));
         }
 
@@ -57,46 +57,49 @@ int main()
 
     // World
     hittable_list_t world;
-    world.n_objects = 0;
+    hittable_list_init(&world);
 
-    lambertian_t lambertian_ground = { .albedo = { 0.5f, 0.5f, 0.5f } };
-    material_t material_ground = { .object = &lambertian_ground, .scatter_func = lambertian_scatter };
-    sphere_t sphere_ground = { .centre = { 0.0f, -1000.0f, 0.0f }, .radius = 1000.0f, .material = &material_ground };
-    hittable_t hittable_ground = { .object = &sphere_ground, .hit_func = sphere_hit };
-    hittable_list_add(&world, hittable_ground);
+    lambertian_t lambertian_ground;
+    colour_t ground_albedo = { 0.5f, 0.5f, 0.5f };
+    lambertian_init(&lambertian_ground, ground_albedo);
+    sphere_t sphere_ground;
+    point_t ground_centre = { 0.0f, -1000.0f, 0.0f };
+    sphere_init(&sphere_ground, ground_centre, 1000.0f, (material_t*)&lambertian_ground);
+    hittable_list_add(&world, (hittable_t*)&sphere_ground);
 
-    dielectric_t dielectric_obj_1 = { .ir = 1.5f };
-    material_t material_obj_1 = { .object = &dielectric_obj_1, .scatter_func = dielectric_scatter };
-    sphere_t sphere_obj_1 = { .centre = { 0.0f, 1.0f, 0.0f }, .radius = 1.0f, .material = &material_obj_1 };
-    hittable_t hittable_obj_1 = { .object = &sphere_obj_1, .hit_func = sphere_hit };
-    hittable_list_add(&world, hittable_obj_1);
+    dielectric_t dielectric_obj_1;
+    dielectric_init(&dielectric_obj_1, 1.5f);
+    sphere_t sphere_obj_1;
+    point_t obj_1_centre = { 0.0f, 1.0f, 0.0f };
+    sphere_init(&sphere_obj_1, obj_1_centre, 1.0f, (material_t*)&dielectric_obj_1);
+    hittable_list_add(&world, (hittable_t*)&sphere_obj_1);
 
-    lambertian_t lambertian_obj_2 = { .albedo = { 0.4f, 0.2f, 0.1f } };
-    material_t material_obj_2 = { .object = &lambertian_obj_2, .scatter_func = lambertian_scatter };
-    sphere_t sphere_obj_2 = { .centre = { -4.0f, 1.0f, 0.0f }, .radius = 1.0f, .material = &material_obj_2 };
-    hittable_t hittable_obj_2 = { .object = &sphere_obj_2, .hit_func = sphere_hit };
-    hittable_list_add(&world, hittable_obj_2);
+    lambertian_t lambertian_obj_2;
+    colour_t obj_2_albedo = { 0.4f, 0.2f, 0.1f };
+    lambertian_init(&lambertian_obj_2, obj_2_albedo);
+    sphere_t sphere_obj_2;
+    point_t obj_2_centre = { -4.0f, 1.0f, 0.0f };
+    sphere_init(&sphere_obj_2, obj_2_centre, 1.0f, (material_t*)&lambertian_obj_2);
+    hittable_list_add(&world, (hittable_t*)&sphere_obj_2);
 
-    metal_t metal_obj_3 = { .albedo = { 0.7f, 0.6f, 0.5f }, .fuzz = 0.0f };
-    material_t material_obj_3 = { .object = &metal_obj_3, .scatter_func = metal_scatter };
-    sphere_t sphere_obj_3 = { .centre = { 4.0f, 1.0f, 0.0f }, .radius = 1.0f, .material = &material_obj_3 };
-    hittable_t hittable_obj_3 = { .object = &sphere_obj_3, .hit_func = sphere_hit };
-    hittable_list_add(&world, hittable_obj_3);
+    metal_t metal_obj_3;
+    colour_t obj_3_albedo = { 0.7f, 0.6f, 0.5f };
+    metal_init(&metal_obj_3, obj_3_albedo, 0.0f);
+    sphere_t sphere_obj_3;
+    point_t obj_3_centre = { 4.0f, 1.0f, 0.0f };
+    sphere_init(&sphere_obj_3, obj_3_centre, 1.0f, (material_t*)&metal_obj_3);
+    hittable_list_add(&world, (hittable_t*)&sphere_obj_3);
 
-    lambertian_t random_lambertians[TOTAL_NUM_RANDOM_SPHERES];
+    lambertian_t random_lambertians[MAX_NUM_RANDOM_SPHERES];
     size_t n_random_lambertians = 0;
-    metal_t random_metals[TOTAL_NUM_RANDOM_SPHERES];
+    metal_t random_metals[MAX_NUM_RANDOM_SPHERES];
     size_t n_random_metals = 0;
-    dielectric_t random_dielectrics[TOTAL_NUM_RANDOM_SPHERES];
+    dielectric_t random_dielectrics[MAX_NUM_RANDOM_SPHERES];
     size_t n_random_dielectrics = 0;
-    material_t random_materials[TOTAL_NUM_RANDOM_SPHERES];
-    size_t n_random_materials = 0;
-    sphere_t random_spheres[TOTAL_NUM_RANDOM_SPHERES];
+    sphere_t random_spheres[MAX_NUM_RANDOM_SPHERES];
     size_t n_random_spheres = 0;
-    hittable_t random_hittables[TOTAL_NUM_RANDOM_SPHERES];
-    size_t n_random_hittables = 0;
 
-    const int32_t random_sphere_idx_max = ((int32_t)sqrtf(TOTAL_NUM_RANDOM_SPHERES) - 1) / 2;
+    const int32_t random_sphere_idx_max = ((int32_t)sqrtf(MAX_NUM_RANDOM_SPHERES) - 1) / 2;
     const int32_t random_sphere_idx_min = -random_sphere_idx_max;
     for(int32_t a = random_sphere_idx_min; a < random_sphere_idx_max; a++) {
         for(int32_t b = random_sphere_idx_min; b < random_sphere_idx_max; b++) {
@@ -107,67 +110,27 @@ int main()
             if(vec_length(VEC_SUB_V(centre, p)) > 0.9f) {
                 if (choose_mat < 0.8) {
                     // diffuse
-                    random_lambertians[n_random_lambertians].albedo = VEC_MUL_V(vec_random(), vec_random());
-
-                    random_materials[n_random_materials].object = &random_lambertians[n_random_lambertians];
-                    random_materials[n_random_materials].scatter_func = lambertian_scatter;
-
-                    random_spheres[n_random_spheres].centre = centre;
-                    random_spheres[n_random_spheres].radius = 0.2f;
-                    random_spheres[n_random_spheres].material = &random_materials[n_random_materials];
-
-                    random_hittables[n_random_hittables].object = &random_spheres[n_random_spheres];
-                    random_hittables[n_random_hittables].hit_func = sphere_hit;
-
-                    hittable_list_add(&world, random_hittables[n_random_hittables]);
-
+                    lambertian_init(&random_lambertians[n_random_lambertians], VEC_MUL_V(vec_random(), vec_random()));
+                    sphere_init(&random_spheres[n_random_spheres], centre, 0.2f, (material_t*)&random_lambertians[n_random_lambertians]);
+                    hittable_list_add(&world, (hittable_t*)&random_spheres[n_random_spheres]);
                     ++n_random_lambertians;
-                    ++n_random_materials;
                     ++n_random_spheres;
-                    ++n_random_hittables;
                 }
                 else if(choose_mat < 0.95f) {
                     // metal
-                    random_metals[n_random_metals].albedo = vec_random_mm(0.5f, 1.0f);
-                    random_metals[n_random_metals].fuzz = random_f_mm(0.0f, 0.5f);
-
-                    random_materials[n_random_materials].object = &random_metals[n_random_metals];
-                    random_materials[n_random_materials].scatter_func = metal_scatter;
-
-                    random_spheres[n_random_spheres].centre = centre;
-                    random_spheres[n_random_spheres].radius = 0.2f;
-                    random_spheres[n_random_spheres].material = &random_materials[n_random_materials];
-
-                    random_hittables[n_random_hittables].object = &random_spheres[n_random_spheres];
-                    random_hittables[n_random_hittables].hit_func = sphere_hit;
-
-                    hittable_list_add(&world, random_hittables[n_random_hittables]);
-
+                    metal_init(&random_metals[n_random_metals], vec_random_mm(0.5f, 1.0f), random_f_mm(0.0f, 0.5f));
+                    sphere_init(&random_spheres[n_random_spheres], centre, 0.2f, (material_t*)&random_metals[n_random_metals]);
+                    hittable_list_add(&world, (hittable_t*)&random_spheres[n_random_spheres]);
                     ++n_random_metals;
-                    ++n_random_materials;
                     ++n_random_spheres;
-                    ++n_random_hittables;
                 }
                 else {
                     // glass
-                    random_dielectrics[n_random_dielectrics].ir = 1.5f;
-
-                    random_materials[n_random_materials].object = &random_dielectrics[n_random_dielectrics];
-                    random_materials[n_random_materials].scatter_func = dielectric_scatter;
-
-                    random_spheres[n_random_spheres].centre = centre;
-                    random_spheres[n_random_spheres].radius = 0.2f;
-                    random_spheres[n_random_spheres].material = &random_materials[n_random_materials];
-
-                    random_hittables[n_random_hittables].object = &random_spheres[n_random_spheres];
-                    random_hittables[n_random_hittables].hit_func = sphere_hit;
-
-                    hittable_list_add(&world, random_hittables[n_random_hittables]);
-
+                    dielectric_init(&random_dielectrics[n_random_dielectrics], 1.5f);
+                    sphere_init(&random_spheres[n_random_spheres], centre, 0.2f, (material_t*)&random_dielectrics[n_random_dielectrics]);
+                    hittable_list_add(&world, (hittable_t*)&random_spheres[n_random_spheres]);
                     ++n_random_dielectrics;
-                    ++n_random_materials;
                     ++n_random_spheres;
-                    ++n_random_hittables;
                 }
             }
         }

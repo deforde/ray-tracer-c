@@ -2,6 +2,18 @@
 
 #include <math.h>
 
+hittable_vtable_t sphere_vtable = {
+    .hit_func = sphere_hit
+};
+
+void sphere_init(sphere_t* sphere, point_t centre, float radius, material_t* material)
+{
+    sphere->hittable.vtable = &sphere_vtable;
+    sphere->centre = centre;
+    sphere->radius = radius;
+    sphere->material = material;
+}
+
 bool sphere_hit(void* object, ray_t r, float t_min, float t_max, hit_record_t* rec)
 {
     sphere_t* sphere = (sphere_t*)object;
