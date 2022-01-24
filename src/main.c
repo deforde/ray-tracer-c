@@ -5,6 +5,8 @@
 #include <float.h>
 #include <math.h>
 
+#include <omp.h>
+
 #include "camera.h"
 #include "dielectric.h"
 #include "hit_record.h"
@@ -19,6 +21,7 @@
 #include "vec.h"
 
 #define MAX_NUM_RANDOM_SPHERES 23 * 23
+#define TOTAL_NUM_OBJECTS MAX_NUM_RANDOM_SPHERES + 4
 
 colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
 {
@@ -58,45 +61,45 @@ int main()
     hittable_list_t world;
     hittable_list_init(&world);
 
-    lambertian_t lambertian_ground;
+    lambertian_t lambertians[TOTAL_NUM_OBJECTS];
+    size_t n_lambertians = 0;
+    metal_t metals[TOTAL_NUM_OBJECTS];
+    size_t n_metals = 0;
+    dielectric_t dielectrics[TOTAL_NUM_OBJECTS];
+    size_t n_dielectrics = 0;
+    sphere_t spheres[TOTAL_NUM_OBJECTS];
+    size_t n_spheres = 0;
+
     colour_t ground_albedo = { 0.5f, 0.5f, 0.5f };
-    lambertian_init(&lambertian_ground, ground_albedo);
-    sphere_t sphere_ground;
+    lambertian_init(&lambertians[n_lambertians], ground_albedo);
     point_t ground_centre = { 0.0f, -1000.0f, 0.0f };
-    sphere_init(&sphere_ground, ground_centre, 1000.0f, (material_t*)&lambertian_ground);
-    hittable_list_add(&world, (hittable_t*)&sphere_ground);
+    sphere_init(&spheres[n_spheres], ground_centre, 1000.0f, (material_t*)&lambertians[n_lambertians]);
+    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
+    ++n_lambertians;
+    ++n_spheres;
 
-    dielectric_t dielectric_obj_1;
-    dielectric_init(&dielectric_obj_1, 1.5f);
-    sphere_t sphere_obj_1;
+    dielectric_init(&dielectrics[n_dielectrics], 1.5f);
     point_t obj_1_centre = { 0.0f, 1.0f, 0.0f };
-    sphere_init(&sphere_obj_1, obj_1_centre, 1.0f, (material_t*)&dielectric_obj_1);
-    hittable_list_add(&world, (hittable_t*)&sphere_obj_1);
+    sphere_init(&spheres[n_spheres], obj_1_centre, 1.0f, (material_t*)&dielectrics[n_dielectrics]);
+    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
+    ++n_dielectrics;
+    ++n_spheres;
 
-    lambertian_t lambertian_obj_2;
     colour_t obj_2_albedo = { 0.4f, 0.2f, 0.1f };
-    lambertian_init(&lambertian_obj_2, obj_2_albedo);
-    sphere_t sphere_obj_2;
+    lambertian_init(&lambertians[n_lambertians], obj_2_albedo);
     point_t obj_2_centre = { -4.0f, 1.0f, 0.0f };
-    sphere_init(&sphere_obj_2, obj_2_centre, 1.0f, (material_t*)&lambertian_obj_2);
-    hittable_list_add(&world, (hittable_t*)&sphere_obj_2);
+    sphere_init(&spheres[n_spheres], obj_2_centre, 1.0f, (material_t*)&lambertians[n_lambertians]);
+    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
+    ++n_lambertians;
+    ++n_spheres;
 
-    metal_t metal_obj_3;
     colour_t obj_3_albedo = { 0.7f, 0.6f, 0.5f };
-    metal_init(&metal_obj_3, obj_3_albedo, 0.0f);
-    sphere_t sphere_obj_3;
+    metal_init(&metals[n_metals], obj_3_albedo, 0.0f);
     point_t obj_3_centre = { 4.0f, 1.0f, 0.0f };
-    sphere_init(&sphere_obj_3, obj_3_centre, 1.0f, (material_t*)&metal_obj_3);
-    hittable_list_add(&world, (hittable_t*)&sphere_obj_3);
-
-    lambertian_t random_lambertians[MAX_NUM_RANDOM_SPHERES];
-    size_t n_random_lambertians = 0;
-    metal_t random_metals[MAX_NUM_RANDOM_SPHERES];
-    size_t n_random_metals = 0;
-    dielectric_t random_dielectrics[MAX_NUM_RANDOM_SPHERES];
-    size_t n_random_dielectrics = 0;
-    sphere_t random_spheres[MAX_NUM_RANDOM_SPHERES];
-    size_t n_random_spheres = 0;
+    sphere_init(&spheres[n_spheres], obj_3_centre, 1.0f, (material_t*)&metals[n_metals]);
+    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
+    ++n_metals;
+    ++n_spheres;
 
     const int32_t random_sphere_idx_max = ((int32_t)sqrtf(MAX_NUM_RANDOM_SPHERES) - 1) / 2;
     const int32_t random_sphere_idx_min = -random_sphere_idx_max;
@@ -109,27 +112,27 @@ int main()
             if(vec_length(VEC_SUB_V(centre, p)) > 0.9f) {
                 if (choose_mat < 0.8) {
                     // diffuse
-                    lambertian_init(&random_lambertians[n_random_lambertians], VEC_MUL_V(vec_random(), vec_random()));
-                    sphere_init(&random_spheres[n_random_spheres], centre, 0.2f, (material_t*)&random_lambertians[n_random_lambertians]);
-                    hittable_list_add(&world, (hittable_t*)&random_spheres[n_random_spheres]);
-                    ++n_random_lambertians;
-                    ++n_random_spheres;
+                    lambertian_init(&lambertians[n_lambertians], VEC_MUL_V(vec_random(), vec_random()));
+                    sphere_init(&spheres[n_spheres], centre, 0.2f, (material_t*)&lambertians[n_lambertians]);
+                    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
+                    ++n_lambertians;
+                    ++n_spheres;
                 }
                 else if(choose_mat < 0.95f) {
                     // metal
-                    metal_init(&random_metals[n_random_metals], vec_random_mm(0.5f, 1.0f), random_f_mm(0.0f, 0.5f));
-                    sphere_init(&random_spheres[n_random_spheres], centre, 0.2f, (material_t*)&random_metals[n_random_metals]);
-                    hittable_list_add(&world, (hittable_t*)&random_spheres[n_random_spheres]);
-                    ++n_random_metals;
-                    ++n_random_spheres;
+                    metal_init(&metals[n_metals], vec_random_mm(0.5f, 1.0f), random_f_mm(0.0f, 0.5f));
+                    sphere_init(&spheres[n_spheres], centre, 0.2f, (material_t*)&metals[n_metals]);
+                    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
+                    ++n_metals;
+                    ++n_spheres;
                 }
                 else {
                     // glass
-                    dielectric_init(&random_dielectrics[n_random_dielectrics], 1.5f);
-                    sphere_init(&random_spheres[n_random_spheres], centre, 0.2f, (material_t*)&random_dielectrics[n_random_dielectrics]);
-                    hittable_list_add(&world, (hittable_t*)&random_spheres[n_random_spheres]);
-                    ++n_random_dielectrics;
-                    ++n_random_spheres;
+                    dielectric_init(&dielectrics[n_dielectrics], 1.5f);
+                    sphere_init(&spheres[n_spheres], centre, 0.2f, (material_t*)&dielectrics[n_dielectrics]);
+                    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
+                    ++n_dielectrics;
+                    ++n_spheres;
                 }
             }
         }
@@ -146,30 +149,42 @@ int main()
     camera_init(&cam, lookfrom, lookat, vup, vfov, aspect_ratio, aperture, dist_to_focus);
 
     // Render
+    colour_t* pixels = (colour_t*)malloc(image_height * image_width * sizeof(colour_t));
+
+    printf("Rendering...\n");
+    #pragma omp parallel for
+    for(size_t n = 0; n < image_height * image_width; ++n) {
+        const int thread_id = omp_get_thread_num();
+        if(thread_id == 0) {
+            printf("%3u%%\r", (uint32_t)(100.0f * n * omp_get_num_threads() / (image_height * image_width)));
+            fflush(stdout);
+        }
+        size_t i = n / image_width;
+        size_t j = n % image_width;
+        colour_t pixel_colour = { .x = 0, .y = 0, .z = 0 };
+        for(size_t s = 0; s < samples_per_pixel; ++s) {
+            const float u = (j + random_f()) / (image_width - 1);
+            const float v = ((image_height - 1 - i) + random_f()) / (image_height - 1);
+            ray_t r = camera_get_ray(&cam, u, v);
+            pixel_colour = VEC_ADD_V(pixel_colour, ray_colour(r, &world, max_depth));
+        }
+        pixels[n] = pixel_colour;
+    }
+    printf("100%%\n");
+
+    // Write
     FILE* image_file = fopen("image.ppm", "w");
     char buf[128] = {0};
     const size_t buf_len = snprintf(buf, sizeof(buf), "P3\n%u %u\n255\n", image_width, image_height);
     fwrite(buf, buf_len, 1, image_file);
     memset(buf, 0, sizeof(buf));
-
-    printf("Rendering...\n");
-    for(int32_t i = (image_height - 1); i >= 0; --i) {
-        printf("%3u%%\r", (uint32_t)(100.0f * (1.0f - (float)i / image_height)));
-        fflush(stdout);
-        for(int32_t j = 0; j < image_width; ++j) {
-            colour_t pixel_colour = { .x = 0, .y = 0, .z = 0 };
-            for(size_t s = 0; s < samples_per_pixel; ++s) {
-                const float u = (j + random_f()) / (image_width - 1);
-                const float v = (i + random_f()) / (image_height - 1);
-                ray_t r = camera_get_ray(&cam, u, v);
-                pixel_colour = VEC_ADD_V(pixel_colour, ray_colour(r, &world, max_depth));
-            }
-            write_colour(image_file, pixel_colour, samples_per_pixel);
-        }
+    for(size_t n = 0; n < image_height * image_width; ++n) {
+        colour_t pixel_colour = pixels[n];
+        write_colour(image_file, pixel_colour, samples_per_pixel);
     }
-    printf("100%%\n");
-
     fclose(image_file);
+
+    free(pixels);
 
     return EXIT_SUCCESS;
 }
