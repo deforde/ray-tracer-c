@@ -74,14 +74,12 @@ int main()
     lambertian_init(&lambertians[n_lambertians], ground_albedo);
     point_t ground_centre = { 0.0f, -1000.0f, 0.0f };
     sphere_init(&spheres[n_spheres], ground_centre, 1000.0f, (material_t*)&lambertians[n_lambertians]);
-    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
     ++n_lambertians;
     ++n_spheres;
 
     dielectric_init(&dielectrics[n_dielectrics], 1.5f);
     point_t obj_1_centre = { 0.0f, 1.0f, 0.0f };
     sphere_init(&spheres[n_spheres], obj_1_centre, 1.0f, (material_t*)&dielectrics[n_dielectrics]);
-    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
     ++n_dielectrics;
     ++n_spheres;
 
@@ -89,7 +87,6 @@ int main()
     lambertian_init(&lambertians[n_lambertians], obj_2_albedo);
     point_t obj_2_centre = { -4.0f, 1.0f, 0.0f };
     sphere_init(&spheres[n_spheres], obj_2_centre, 1.0f, (material_t*)&lambertians[n_lambertians]);
-    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
     ++n_lambertians;
     ++n_spheres;
 
@@ -97,7 +94,6 @@ int main()
     metal_init(&metals[n_metals], obj_3_albedo, 0.0f);
     point_t obj_3_centre = { 4.0f, 1.0f, 0.0f };
     sphere_init(&spheres[n_spheres], obj_3_centre, 1.0f, (material_t*)&metals[n_metals]);
-    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
     ++n_metals;
     ++n_spheres;
 
@@ -114,7 +110,6 @@ int main()
                     // diffuse
                     lambertian_init(&lambertians[n_lambertians], VEC_MUL_V(vec_random(), vec_random()));
                     sphere_init(&spheres[n_spheres], centre, 0.2f, (material_t*)&lambertians[n_lambertians]);
-                    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
                     ++n_lambertians;
                     ++n_spheres;
                 }
@@ -122,7 +117,6 @@ int main()
                     // metal
                     metal_init(&metals[n_metals], vec_random_mm(0.5f, 1.0f), random_f_mm(0.0f, 0.5f));
                     sphere_init(&spheres[n_spheres], centre, 0.2f, (material_t*)&metals[n_metals]);
-                    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
                     ++n_metals;
                     ++n_spheres;
                 }
@@ -130,12 +124,15 @@ int main()
                     // glass
                     dielectric_init(&dielectrics[n_dielectrics], 1.5f);
                     sphere_init(&spheres[n_spheres], centre, 0.2f, (material_t*)&dielectrics[n_dielectrics]);
-                    hittable_list_add(&world, (hittable_t*)&spheres[n_spheres]);
                     ++n_dielectrics;
                     ++n_spheres;
                 }
             }
         }
+    }
+
+    for(size_t n = 0; n < n_spheres; n++) {
+        hittable_list_add(&world, (hittable_t*)&spheres[n]);
     }
 
     // Camera
