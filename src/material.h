@@ -1,5 +1,5 @@
-#ifndef __MATERIAL_H__
-#define __MATERIAL_H__
+#ifndef MATERIAL_H
+#define MATERIAL_H
 
 #include <stdbool.h>
 
@@ -19,4 +19,4 @@ typedef struct material_struct_t {
 
 bool material_scatter(material_t* material, ray_t r_in, hit_record_t rec, colour_t* attenuation, ray_t* scattered);
 
-#endif //__MATERIAL_H__
+#endif //MATERIAL_H

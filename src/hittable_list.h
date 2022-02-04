@@ -1,5 +1,5 @@
-#ifndef __HITTABLE_LIST_H__
-#define __HITTABLE_LIST_H__
+#ifndef HITTABLE_LIST_H
+#define HITTABLE_LIST_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -20,4 +20,4 @@ void hittable_list_add(hittable_list_t* world, hittable_t* hittable);
 void hittable_list_clear(hittable_list_t* world);
 bool hittable_list_hit(hittable_list_t* world, ray_t r, float t_min, float t_max, hit_record_t* rec);
 
-#endif //__HITTABLE_LIST_H__
+#endif //HITTABLE_LIST_H

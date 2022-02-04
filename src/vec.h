@@ -1,5 +1,5 @@
-#ifndef __VEC_H___
-#define __VEC_H___
+#ifndef VEC_H
+#define VEC_H
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -78,4 +78,4 @@ vec_t vec_refract(vec_t uv, vec_t n, float etai_over_etat);
 typedef vec_t point_t;
 typedef vec_t colour_t;
 
-#endif //__VEC_H___
+#endif //VEC_H

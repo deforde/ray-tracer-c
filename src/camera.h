@@ -1,5 +1,5 @@
-#ifndef __CAMERA_H__
-#define __CAMERA_H__
+#ifndef CAMERA_H
+#define CAMERA_H
 
 #include "ray.h"
 #include "vec.h"
@@ -18,4 +18,4 @@ typedef struct {
 void camera_init(camera_t* cam, point_t lookfrom, point_t lookat, vec_t vup, float vfov, float aspect_ratio, float aperture, float focus_dist);
 ray_t camera_get_ray(camera_t* cam, float u, float v);
 
-#endif //__CAMERA_H__
+#endif //CAMERA_H

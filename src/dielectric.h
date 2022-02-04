@@ -1,5 +1,5 @@
-#ifndef __DIELECTRIC_H__
-#define __DIELECTRIC_H__
+#ifndef DIELECTRIC_H
+#define DIELECTRIC_H
 
 #include <stdbool.h>
 
@@ -16,4 +16,4 @@ typedef struct {
 void dielectric_init(dielectric_t* dielectric, float ir);
 bool dielectric_scatter(void* object, ray_t r_in, hit_record_t rec, colour_t* attenuation, ray_t* scattered);
 
-#endif //__DIELECTRIC_H__
+#endif //DIELECTRIC_H

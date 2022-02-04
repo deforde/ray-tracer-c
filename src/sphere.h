@@ -1,5 +1,5 @@
-#ifndef __SPHERE_H__
-#define __SPHERE_H__
+#ifndef SPHERE_H
+#define SPHERE_H
 
 #include <stdbool.h>
 
@@ -19,4 +19,4 @@ typedef struct {
 void sphere_init(sphere_t* sphere, point_t centre, float radius, material_t* material);
 bool sphere_hit(void* object, ray_t r, float t_min, float t_max, hit_record_t* rec);
 
-#endif //__SPHERE_H__
+#endif //SPHERE_H

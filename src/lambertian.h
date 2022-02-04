@@ -1,5 +1,5 @@
-#ifndef __LAMBERTIAN_H__
-#define __LAMBERTIAN_H__
+#ifndef LAMBERTIAN_H
+#define LAMBERTIAN_H
 
 #include <stdbool.h>
 
@@ -16,4 +16,4 @@ typedef struct {
 void lambertian_init(lambertian_t* lambertian, colour_t albedo);
 bool lambertian_scatter(void* object, ray_t r_in, hit_record_t rec, colour_t* attenuation, ray_t* scattered);
 
-#endif //__LAMBERTIAN_H__
+#endif //LAMBERTIAN_H

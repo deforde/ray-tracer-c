@@ -1,5 +1,5 @@
-#ifndef __HITTABLE_H__
-#define __HITTABLE_H__
+#ifndef HITTABLE_H
+#define HITTABLE_H
 
 #include <stdbool.h>
 
@@ -18,4 +18,4 @@ typedef struct {
 
 bool hittable_hit(hittable_t* hittable, ray_t r, float t_min, float t_max, hit_record_t* rec);
 
-#endif //__HITTABLE_H__
+#endif //HITTABLE_H

@@ -1,5 +1,5 @@
-#ifndef __UTIL_H__
-#define __UTIL_H__
+#ifndef UTIL_H
+#define UTIL_H
 
 #include <stdio.h>
 
@@ -16,4 +16,4 @@ float clamp(float x, float min, float max);
 
 float reflectance(float cosine, float ref_idx);
 
-#endif //__UTIL_H__
+#endif //UTIL_H

@@ -1,5 +1,5 @@
-#ifndef __RAY_H__
-#define __RAY_H__
+#ifndef RAY_H
+#define RAY_H
 
 #include "vec.h"
 
@@ -10,4 +10,4 @@ typedef struct {
 
 point_t ray_at(ray_t r, float t);
 
-#endif //__RAY_H__
+#endif //RAY_H
