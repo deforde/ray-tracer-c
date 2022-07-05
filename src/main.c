@@ -150,7 +150,7 @@ int main()
 
     printf("Rendering...\n");
     #pragma omp parallel for
-    for(size_t n = 0; n < image_height * image_width; ++n) {
+    for(size_t n = 0; n < (size_t)(image_height * image_width); ++n) {
         const int thread_id = omp_get_thread_num();
         if(thread_id == 0) {
             printf("%3u%%\r", (uint32_t)(100.0f * n * omp_get_num_threads() / (image_height * image_width)));
@@ -175,7 +175,7 @@ int main()
     const size_t buf_len = snprintf(buf, sizeof(buf), "P3\n%u %u\n255\n", image_width, image_height);
     fwrite(buf, buf_len, 1, image_file);
     memset(buf, 0, sizeof(buf));
-    for(size_t n = 0; n < image_height * image_width; ++n) {
+    for(size_t n = 0; n < (size_t)(image_height * image_width); ++n) {
         colour_t pixel_colour = pixels[n];
         write_colour(image_file, pixel_colour, samples_per_pixel);
     }
