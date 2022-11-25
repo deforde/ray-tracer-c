@@ -30,22 +30,25 @@ colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
         return zero_colour;
 
     hit_record_t rec;
-    if(hittable_list_hit(world, r, 0.001f, FLT_MAX, &rec)) {
+    if(hittable_list_hit(world, &r, 0.001f, FLT_MAX, &rec)) {
         ray_t scattered = { .orig = {0,0,0}, .dir = {0,0,0} };
         colour_t attenuation = { .x = 0, .y = 0, .z = 0 };
 
-        if(material_scatter(rec.material, r, rec, &attenuation, &scattered)) {
-            return VEC_MUL_V(attenuation, ray_colour(scattered, world, depth - 1));
+        if(material_scatter(rec.material, &r, &rec, &attenuation, &scattered)) {
+            const colour_t ray_col = ray_colour(scattered, world, depth - 1);
+            return VEC_MUL_V(&attenuation, &ray_col);
         }
 
         return zero_colour;
     }
 
-    vec_t unit_dir = vec_unit(r.dir);
+    vec_t unit_dir = vec_unit(&r.dir);
     const float t = 0.5f * (unit_dir.y + 1.0f);
-    const colour_t a = { .x = 1.0f, .y = 1.0f, .z = 1.0f};
-    const colour_t b = { .x = 0.5f, .y = 0.7f, .z = 1.0f};
-    return VEC_ADD_V(VEC_MUL_F(a, 1.0f - t), VEC_MUL_F(b, t));
+    colour_t a = { .x = 1.0f, .y = 1.0f, .z = 1.0f};
+    a = VEC_MUL_F(&a, 1.0f - t);
+    colour_t b = { .x = 0.5f, .y = 0.7f, .z = 1.0f};
+    b = VEC_MUL_F(&b, t);
+    return VEC_ADD_V(&a, &b);
 }
 
 int main()
@@ -105,10 +108,13 @@ int main()
             const point_t centre = { .x = a + 0.9f * random_f(), .y = 0.2f, .z = b + 0.9f * random_f() };
             const point_t p = { .x = 4.0f, .y = 0.2f, .z = 0.0f };
 
-            if(vec_length(VEC_SUB_V(centre, p)) > 0.9f) {
+            const vec_t x = VEC_SUB_V(&centre, &p);
+            if(vec_length(&x) > 0.9f) {
                 if (choose_mat < 0.8) {
                     // diffuse
-                    lambertian_init(&lambertians[n_lambertians], VEC_MUL_V(vec_random(), vec_random()));
+                    const vec_t rand_1 = vec_random();
+                    const vec_t rand_2 = vec_random();
+                    lambertian_init(&lambertians[n_lambertians], VEC_MUL_V(&rand_1, &rand_2));
                     sphere_init(&spheres[n_spheres], centre, 0.2f, (material_t*)&lambertians[n_lambertians]);
                     ++n_lambertians;
                     ++n_spheres;
@@ -163,7 +169,8 @@ int main()
             const float u = (j + random_f()) / (image_width - 1);
             const float v = ((image_height - 1 - i) + random_f()) / (image_height - 1);
             ray_t r = camera_get_ray(&cam, u, v);
-            pixel_colour = VEC_ADD_V(pixel_colour, ray_colour(r, &world, max_depth));
+            const colour_t ray_col = ray_colour(r, &world, max_depth);
+            pixel_colour = VEC_ADD_V(&pixel_colour, &ray_col);
         }
         pixels[n] = pixel_colour;
     }
@@ -177,7 +184,7 @@ int main()
     memset(buf, 0, sizeof(buf));
     for(size_t n = 0; n < (size_t)(image_height * image_width); ++n) {
         colour_t pixel_colour = pixels[n];
-        write_colour(image_file, pixel_colour, samples_per_pixel);
+        write_colour(image_file, &pixel_colour, samples_per_pixel);
     }
     fclose(image_file);
 

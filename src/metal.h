@@ -15,6 +15,6 @@ typedef struct {
 } metal_t;
 
 void metal_init(metal_t* metal, colour_t albedo, float fuzz);
-bool metal_scatter(void* object, ray_t r_in, hit_record_t rec, colour_t* attenuation, ray_t* scattered);
+bool metal_scatter(void* object, ray_t *r_in, hit_record_t *rec, colour_t* attenuation, ray_t* scattered);
 
 #endif //METAL_H

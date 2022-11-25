@@ -18,7 +18,7 @@ void hittable_list_clear(hittable_list_t* world)
     world->n_objects = 0;
 }
 
-bool hittable_list_hit(hittable_list_t* world, ray_t r, float t_min, float t_max, hit_record_t* rec)
+bool hittable_list_hit(hittable_list_t* world, ray_t *r, float t_min, float t_max, hit_record_t* rec)
 {
     hit_record_t temp_rec;
     bool hit_anything = false;

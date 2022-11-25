@@ -18,6 +18,6 @@ typedef struct {
 void hittable_list_init(hittable_list_t* world);
 void hittable_list_add(hittable_list_t* world, hittable_t* hittable);
 void hittable_list_clear(hittable_list_t* world);
-bool hittable_list_hit(hittable_list_t* world, ray_t r, float t_min, float t_max, hit_record_t* rec);
+bool hittable_list_hit(hittable_list_t* world, ray_t *r, float t_min, float t_max, hit_record_t* rec);
 
 #endif //HITTABLE_LIST_H

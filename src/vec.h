@@ -15,10 +15,10 @@ vec_t vec_sub_v(size_t n, ...);
 vec_t vec_mul_v(size_t n, ...);
 vec_t vec_div_v(size_t n, ...);
 
-vec_t vec_add_f(vec_t u, size_t n, ...);
-vec_t vec_sub_f(vec_t u, size_t n, ...);
-vec_t vec_mul_f(vec_t u, size_t n, ...);
-vec_t vec_div_f(vec_t u, size_t n, ...);
+vec_t vec_add_f(const vec_t *u, size_t n, ...);
+vec_t vec_sub_f(const vec_t *u, size_t n, ...);
+vec_t vec_mul_f(const vec_t *u, size_t n, ...);
+vec_t vec_div_f(const vec_t *u, size_t n, ...);
 
 #define PP_NARG(...) \
          PP_NARG_(__VA_ARGS__,PP_RSEQ_N())
@@ -55,25 +55,25 @@ vec_t vec_div_f(vec_t u, size_t n, ...);
 #define VEC_MUL_F(VEC, ...) VEC_FUNC_F(vec_mul_f, VEC, __VA_ARGS__)
 #define VEC_DIV_F(VEC, ...) VEC_FUNC_F(vec_div_f, VEC, __VA_ARGS__)
 
-float vec_length(vec_t v);
-float vec_length_squared(vec_t v);
+float vec_length(const vec_t *v);
+float vec_length_squared(const vec_t *v);
 
-vec_t vec_unit(vec_t v);
+vec_t vec_unit(const vec_t *v);
 
-float vec_dot(vec_t u, vec_t v);
-vec_t vec_cross(vec_t u, vec_t v);
+float vec_dot(const vec_t *u, const vec_t *v);
+vec_t vec_cross(const vec_t *u, const vec_t *v);
 
 vec_t vec_random_mm(double min, double max);
 vec_t vec_random();
 vec_t vec_random_in_unit_sphere();
 vec_t vec_random_unit();
-vec_t vec_random_in_hemisphere(vec_t normal);
+vec_t vec_random_in_hemisphere(const vec_t *normal);
 vec_t vec_random_in_unit_disk();
 
-bool vec_near_zero(vec_t v);
+bool vec_near_zero(const vec_t *v);
 
-vec_t vec_reflect(vec_t v, vec_t n);
-vec_t vec_refract(vec_t uv, vec_t n, float etai_over_etat);
+vec_t vec_reflect(const vec_t *v, const vec_t *n);
+vec_t vec_refract(const vec_t *uv, const vec_t *n, float etai_over_etat);
 
 typedef vec_t point_t;
 typedef vec_t colour_t;

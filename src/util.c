@@ -4,11 +4,11 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-void write_colour(FILE* image_file, colour_t pixel_color, size_t samples_per_pixel)
+void write_colour(FILE* image_file, colour_t *pixel_color, size_t samples_per_pixel)
 {
-    float r = pixel_color.x;
-    float g = pixel_color.y;
-    float b = pixel_color.z;
+    float r = pixel_color->x;
+    float g = pixel_color->y;
+    float b = pixel_color->z;
 
     const float scale = 1.0f / samples_per_pixel;
     r = sqrt(scale * r);
