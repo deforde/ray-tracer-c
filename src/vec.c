@@ -7,142 +7,102 @@
 
 #define NEAR_ZERO_APPROX 1e-8f
 
-vec_t vec_add_v(size_t n, ...)
+vec_t vec_add_v(const vec_t *r, size_t n, const vec_t* x[])
 {
-    va_list ptr;
-    va_start(ptr, n);
+    vec_t v = *r;
 
-    vec_t v = *va_arg(ptr, vec_t*);
-
-    for(size_t i = 1; i < n; ++i) {
-        vec_t *u = va_arg(ptr, vec_t*);
+    for(size_t i = 0; i < n; ++i) {
+        const vec_t *u = x[i];
         v.x += u->x;
         v.y += u->y;
         v.z += u->z;
     }
-    va_end(ptr);
 
     return v;
 }
 
-vec_t vec_sub_v(size_t n, ...)
+vec_t vec_sub_v(const vec_t *r, size_t n, const vec_t* x[])
 {
-    va_list ptr;
-    va_start(ptr, n);
+    vec_t v = *r;
 
-    vec_t v = *va_arg(ptr, vec_t*);
-
-    for(size_t i = 1; i < n; ++i) {
-        vec_t *u = va_arg(ptr, vec_t*);
+    for(size_t i = 0; i < n; ++i) {
+        const vec_t *u = x[i];
         v.x -= u->x;
         v.y -= u->y;
         v.z -= u->z;
     }
-    va_end(ptr);
 
     return v;
 }
 
-vec_t vec_mul_v(size_t n, ...)
+vec_t vec_mul_v(const vec_t *r, size_t n, const vec_t* x[])
 {
-    va_list ptr;
-    va_start(ptr, n);
+    vec_t v = *r;
 
-    vec_t v = *va_arg(ptr, vec_t*);
-
-    for(size_t i = 1; i < n; ++i) {
-        vec_t *u = va_arg(ptr, vec_t*);
+    for(size_t i = 0; i < n; ++i) {
+        const vec_t *u = x[i];
         v.x *= u->x;
         v.y *= u->y;
         v.z *= u->z;
     }
-    va_end(ptr);
 
     return v;
 }
 
-vec_t vec_div_v(size_t n, ...)
+vec_t vec_div_v(const vec_t *r, size_t n, const vec_t* x[])
 {
-    va_list ptr;
-    va_start(ptr, n);
+    vec_t v = *r;
 
-    vec_t v = *va_arg(ptr, vec_t*);
-
-    for(size_t i = 1; i < n; ++i) {
-        vec_t *u = va_arg(ptr, vec_t*);
+    for(size_t i = 0; i < n; ++i) {
+        const vec_t *u = x[i];
         v.x /= u->x;
         v.y /= u->y;
         v.z /= u->z;
     }
-    va_end(ptr);
 
     return v;
 }
 
-vec_t vec_add_f(const vec_t *u, size_t n, ...)
+vec_t vec_add_f(const vec_t *u, float f)
 {
     vec_t v = *u;
 
-    va_list ptr;
-    va_start(ptr, n);
-    for(size_t i = 0; i < n; ++i) {
-        float f = (float)va_arg(ptr, double);
-        v.x += f;
-        v.y += f;
-        v.z += f;
-    }
-    va_end(ptr);
+    v.x += f;
+    v.y += f;
+    v.z += f;
 
     return v;
 }
 
-vec_t vec_sub_f(const vec_t *u, size_t n, ...)
+vec_t vec_sub_f(const vec_t *u, float f)
 {
     vec_t v = *u;
 
-    va_list ptr;
-    va_start(ptr, n);
-    for(size_t i = 0; i < n; ++i) {
-        float f = (float)va_arg(ptr, double);
-        v.x -= f;
-        v.y -= f;
-        v.z -= f;
-    }
-    va_end(ptr);
+    v.x -= f;
+    v.y -= f;
+    v.z -= f;
 
     return v;
 }
 
-vec_t vec_mul_f(const vec_t *u, size_t n, ...)
+vec_t vec_mul_f(const vec_t *u, float f)
 {
     vec_t v = *u;
 
-    va_list ptr;
-    va_start(ptr, n);
-    for(size_t i = 0; i < n; ++i) {
-        float f = (float)va_arg(ptr, double);
-        v.x *= f;
-        v.y *= f;
-        v.z *= f;
-    }
-    va_end(ptr);
+    v.x *= f;
+    v.y *= f;
+    v.z *= f;
 
     return v;
 }
 
-vec_t vec_div_f(const vec_t *u, size_t n, ...)
+vec_t vec_div_f(const vec_t *u, float f)
 {
     vec_t v = *u;
 
-    va_list ptr;
-    va_start(ptr, n);
-    for(size_t i = 0; i < n; ++i) {
-        float f = (float)va_arg(ptr, double);
-        v.x /= f;
-        v.y /= f;
-        v.z /= f;
-    }
-    va_end(ptr);
+    v.x /= f;
+    v.y /= f;
+    v.z /= f;
 
     return v;
 }
@@ -159,7 +119,7 @@ float vec_length_squared(const vec_t *v)
 
 vec_t vec_unit(const vec_t *v)
 {
-    return VEC_DIV_F(v, vec_length(v));
+    return vec_div_f(v, vec_length(v));
 }
 
 float vec_dot(const vec_t *u, const vec_t *v)
@@ -214,7 +174,7 @@ vec_t vec_random_in_hemisphere(const vec_t * normal)
     if(vec_dot(&v, normal) > 0.0f) {
         return v;
     }
-    return VEC_MUL_F(&v, -1.0f);
+    return vec_mul_f(&v, -1.0f);
 }
 
 vec_t vec_random_in_unit_disk()
@@ -238,21 +198,21 @@ bool vec_near_zero(const vec_t * v)
 
 vec_t vec_reflect(const vec_t * v, const vec_t * n)
 {
-    const vec_t a = VEC_MUL_F(n, 2.0f, vec_dot(v, n));
-    return VEC_SUB_V(v, &a);
+    const vec_t a = vec_mul_f(n, 2.0f * vec_dot(v, n));
+    return vec_sub_v(v, 1, (const vec_t*[]){&a});
 }
 
 vec_t vec_refract(const vec_t * uv, const vec_t * n, float etai_over_etat)
 {
-    const vec_t x = VEC_MUL_F(uv, -1.0f);
+    const vec_t x = vec_mul_f(uv, -1.0f);
     const float dot_prod = vec_dot(&x, n);
     const float cos_theta = dot_prod < 1.0f ? dot_prod : 1.0f;
 
-    vec_t a = VEC_MUL_F(n, cos_theta);
-    vec_t b = VEC_ADD_V(uv, &a);
+    vec_t a = vec_mul_f(n, cos_theta);
+    vec_t b = vec_add_v(uv, 1, (const vec_t*[]){&a});
 
-    const vec_t r_out_perp = VEC_MUL_F(&b, etai_over_etat);
-    const vec_t r_out_parallel = VEC_MUL_F(n, -sqrtf(fabsf(1.0f - vec_length_squared(&r_out_perp))));
+    const vec_t r_out_perp = vec_mul_f(&b, etai_over_etat);
+    const vec_t r_out_parallel = vec_mul_f(n, -sqrtf(fabsf(1.0f - vec_length_squared(&r_out_perp))));
 
-    return VEC_ADD_V(&r_out_perp, &r_out_parallel);
+    return vec_add_v(&r_out_perp, 1, (const vec_t*[]){&r_out_parallel});
 }

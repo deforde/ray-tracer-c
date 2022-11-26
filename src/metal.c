@@ -19,8 +19,8 @@ bool metal_scatter(void* object, ray_t *r_in, hit_record_t *rec, colour_t* atten
     const vec_t reflected = vec_reflect(&x, &rec->normal);
     scattered->orig = rec->p;
     const vec_t y = vec_random_in_unit_sphere();
-    const vec_t w = VEC_MUL_F(&y, metal->fuzz);
-    scattered->dir = VEC_ADD_V(&reflected, &w);
+    const vec_t w = vec_mul_f(&y, metal->fuzz);
+    scattered->dir = vec_add_v(&reflected, 1, (const vec_t*[]){&w});
     *attenuation = metal->albedo;
 
     return vec_dot(&scattered->dir, &rec->normal) > 0.0f;

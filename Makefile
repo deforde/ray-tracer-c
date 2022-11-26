@@ -10,12 +10,12 @@ DEPS := $(OBJS:.o=.d)
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-CFLAGS := -Wall -Wextra -Wpedantic -Werror $(INC_FLAGS) -MMD -MP -fopenmp
-LDFLAGS := -lm -fopenmp
+CFLAGS := -Wall -Wextra -Wpedantic -Werror $(INC_FLAGS) -MMD -MP -fopenmp -flto
+LDFLAGS := -lm -fopenmp -flto
 
 EXECUTABLE := $(BUILD_DIR)/$(TARGET_EXEC)
 
-all: CFLAGS += -O3 -DNDEBUG -march=native
+all: CFLAGS += -Ofast -DNDEBUG -march=native
 all: executable
 
 debug: CFLAGS += -g3 -D_FORTIFY_SOURCE=2

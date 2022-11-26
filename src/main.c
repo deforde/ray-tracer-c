@@ -36,7 +36,7 @@ colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
 
         if(material_scatter(rec.material, &r, &rec, &attenuation, &scattered)) {
             const colour_t ray_col = ray_colour(scattered, world, depth - 1);
-            return VEC_MUL_V(&attenuation, &ray_col);
+            return vec_mul_v(&attenuation, 1, (const vec_t*[]){&ray_col});
         }
 
         return zero_colour;
@@ -45,10 +45,10 @@ colour_t ray_colour(ray_t r, hittable_list_t* world, int32_t depth)
     vec_t unit_dir = vec_unit(&r.dir);
     const float t = 0.5f * (unit_dir.y + 1.0f);
     colour_t a = { .x = 1.0f, .y = 1.0f, .z = 1.0f};
-    a = VEC_MUL_F(&a, 1.0f - t);
+    a = vec_mul_f(&a, 1.0f - t);
     colour_t b = { .x = 0.5f, .y = 0.7f, .z = 1.0f};
-    b = VEC_MUL_F(&b, t);
-    return VEC_ADD_V(&a, &b);
+    b = vec_mul_f(&b, t);
+    return vec_add_v(&a, 1, (const vec_t*[]){&b});
 }
 
 int main()
@@ -58,7 +58,7 @@ int main()
     const int32_t image_width = 1200;
     const int32_t image_height = (int32_t)(image_width / aspect_ratio);
     const size_t samples_per_pixel = 500;
-    const int32_t max_depth = 50;
+    const int32_t max_depth = 100;
 
     // World
     hittable_list_t world;
@@ -108,13 +108,13 @@ int main()
             const point_t centre = { .x = a + 0.9f * random_f(), .y = 0.2f, .z = b + 0.9f * random_f() };
             const point_t p = { .x = 4.0f, .y = 0.2f, .z = 0.0f };
 
-            const vec_t x = VEC_SUB_V(&centre, &p);
+            const vec_t x = vec_sub_v(&centre, 1, (const vec_t*[]){&p});
             if(vec_length(&x) > 0.9f) {
                 if (choose_mat < 0.8) {
                     // diffuse
                     const vec_t rand_1 = vec_random();
                     const vec_t rand_2 = vec_random();
-                    lambertian_init(&lambertians[n_lambertians], VEC_MUL_V(&rand_1, &rand_2));
+                    lambertian_init(&lambertians[n_lambertians], vec_mul_v(&rand_1, 1, (const vec_t*[]){&rand_2}));
                     sphere_init(&spheres[n_spheres], centre, 0.2f, (material_t*)&lambertians[n_lambertians]);
                     ++n_lambertians;
                     ++n_spheres;
@@ -170,7 +170,7 @@ int main()
             const float v = ((image_height - 1 - i) + random_f()) / (image_height - 1);
             ray_t r = camera_get_ray(&cam, u, v);
             const colour_t ray_col = ray_colour(r, &world, max_depth);
-            pixel_colour = VEC_ADD_V(&pixel_colour, &ray_col);
+            pixel_colour = vec_add_v(&pixel_colour, 1, (const vec_t*[]){&ray_col});
         }
         pixels[n] = pixel_colour;
     }

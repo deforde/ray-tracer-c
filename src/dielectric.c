@@ -26,7 +26,7 @@ bool dielectric_scatter(void* object, ray_t *r_in, hit_record_t *rec, colour_t* 
 
     const vec_t unit_dir = vec_unit(&r_in->dir);
 
-    const vec_t x = VEC_MUL_F(&unit_dir, -1.0f);
+    const vec_t x = vec_mul_f(&unit_dir, -1.0f);
     const float dot_prod = vec_dot(&x, &rec->normal);
     const float cos_theta = dot_prod < 1.0f ? dot_prod : 1.0f;
     const float sin_theta = sqrtf(1.0f - cos_theta * cos_theta);
