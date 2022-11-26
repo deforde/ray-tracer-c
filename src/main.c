@@ -167,9 +167,10 @@ int main() {
 #pragma omp parallel for
   for (size_t n = 0; n < (size_t)(image_height * image_width); ++n) {
     const int thread_id = omp_get_thread_num();
-    if (thread_id == 0) {
-      printf("%3u%%\r", (uint32_t)(100.0f * n * omp_get_num_threads() /
-                                   (image_height * image_width)));
+    const int num_threads = omp_get_num_threads();
+    if (thread_id == num_threads / 2) {
+      printf("%3u%% (thread: %i/%i)\r", (uint32_t)(100.0f * (n - thread_id * (image_height * image_width / num_threads)) /
+                                   (image_height * image_width / num_threads)), thread_id, num_threads);
       fflush(stdout);
     }
     size_t i = n / image_width;
