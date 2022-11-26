@@ -5,7 +5,8 @@
 
 #include "vec.h"
 
-void write_colour(FILE* image_file, colour_t *pixel_color, size_t samples_per_pixel);
+void write_colour(FILE *image_file, colour_t *pixel_color,
+                  size_t samples_per_pixel);
 
 float random_f_mm(float min, float max);
 float random_f();
@@ -16,4 +17,4 @@ float clamp(float x, float min, float max);
 
 float reflectance(float cosine, float ref_idx);
 
-#endif //UTIL_H
+#endif // UTIL_H
