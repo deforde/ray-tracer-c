@@ -10,10 +10,10 @@ typedef struct {
   float z;
 } vec_t;
 
-vec_t vec_add_v(const vec_t *r, size_t n, const vec_t *x[]);
-vec_t vec_sub_v(const vec_t *r, size_t n, const vec_t *x[]);
-vec_t vec_mul_v(const vec_t *r, size_t n, const vec_t *x[]);
-vec_t vec_div_v(const vec_t *r, size_t n, const vec_t *x[]);
+vec_t vec_add_v(const vec_t *r, size_t n, const vec_t x[]);
+vec_t vec_sub_v(const vec_t *r, size_t n, const vec_t x[]);
+vec_t vec_mul_v(const vec_t *r, size_t n, const vec_t x[]);
+vec_t vec_div_v(const vec_t *r, size_t n, const vec_t x[]);
 
 vec_t vec_add_f(const vec_t *u, float f);
 vec_t vec_sub_f(const vec_t *u, float f);

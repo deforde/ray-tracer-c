@@ -23,40 +23,44 @@
 #define MAX_NUM_RANDOM_SPHERES 23 * 23
 #define TOTAL_NUM_OBJECTS MAX_NUM_RANDOM_SPHERES + 4
 
-colour_t ray_colour(ray_t r, hittable_list_t *world, int32_t depth) {
+#define ASPECT_RATIO (3 / 2)
+#define IMAGE_WIDTH 1200
+#define IMAGE_HEIGHT IMAGE_WIDTH / ASPECT_RATIO
+
+colour_t ray_colour(ray_t *r, hittable_list_t *world, int32_t depth) {
   colour_t zero_colour = {.x = 0, .y = 0, .z = 0};
   if (depth <= 0)
     return zero_colour;
 
   hit_record_t rec;
-  if (hittable_list_hit(world, &r, 0.001f, FLT_MAX, &rec)) {
+  if (hittable_list_hit(world, r, 0.001f, FLT_MAX, &rec)) {
     ray_t scattered = {.orig = {0, 0, 0}, .dir = {0, 0, 0}};
     colour_t attenuation = {.x = 0, .y = 0, .z = 0};
 
-    if (material_scatter(rec.material, &r, &rec, &attenuation, &scattered)) {
-      const colour_t ray_col = ray_colour(scattered, world, depth - 1);
-      return vec_mul_v(&attenuation, 1, (const vec_t *[]){&ray_col});
+    if (material_scatter(rec.material, r, &rec, &attenuation, &scattered)) {
+      const colour_t ray_col = ray_colour(&scattered, world, depth - 1);
+      return vec_mul_v(&attenuation, 1, (const vec_t[]){ray_col});
     }
 
     return zero_colour;
   }
 
-  vec_t unit_dir = vec_unit(&r.dir);
+  vec_t unit_dir = vec_unit(&r->dir);
   const float t = 0.5f * (unit_dir.y + 1.0f);
   colour_t a = {.x = 1.0f, .y = 1.0f, .z = 1.0f};
   a = vec_mul_f(&a, 1.0f - t);
   colour_t b = {.x = 0.5f, .y = 0.7f, .z = 1.0f};
   b = vec_mul_f(&b, t);
-  return vec_add_v(&a, 1, (const vec_t *[]){&b});
+  return vec_add_v(&a, 1, (const vec_t[]){b});
 }
 
 int main() {
   // Image
-  const float aspect_ratio = 3.0f / 2.0f;
-  const int32_t image_width = 1200;
-  const int32_t image_height = (int32_t)(image_width / aspect_ratio);
-  const size_t samples_per_pixel = 500;
-  const int32_t max_depth = 100;
+  const float aspect_ratio = ASPECT_RATIO;
+  const size_t image_width = IMAGE_WIDTH;
+  const size_t image_height = IMAGE_HEIGHT;
+  const size_t samples_per_pixel = 100;
+  const int32_t max_depth = 50;
 
   // World
   hittable_list_t world;
@@ -112,14 +116,14 @@ int main() {
           .x = a + 0.9f * random_f(), .y = 0.2f, .z = b + 0.9f * random_f()};
       const point_t p = {.x = 4.0f, .y = 0.2f, .z = 0.0f};
 
-      const vec_t x = vec_sub_v(&centre, 1, (const vec_t *[]){&p});
+      const vec_t x = vec_sub_v(&centre, 1, (const vec_t[]){p});
       if (vec_length(&x) > 0.9f) {
         if (choose_mat < 0.8) {
           // diffuse
           const vec_t rand_1 = vec_random();
           const vec_t rand_2 = vec_random();
           lambertian_init(&lambertians[n_lambertians],
-                          vec_mul_v(&rand_1, 1, (const vec_t *[]){&rand_2}));
+                          vec_mul_v(&rand_1, 1, (const vec_t[]){rand_2}));
           sphere_init(&spheres[n_spheres], centre, 0.2f,
                       (material_t *)&lambertians[n_lambertians]);
           ++n_lambertians;
@@ -160,8 +164,7 @@ int main() {
               dist_to_focus);
 
   // Render
-  colour_t *pixels =
-      (colour_t *)malloc(image_height * image_width * sizeof(colour_t));
+  colour_t pixels[IMAGE_WIDTH * IMAGE_HEIGHT] = {0};
 
   printf("Rendering...\n");
 #pragma omp parallel for
@@ -169,9 +172,12 @@ int main() {
     const int thread_id = omp_get_thread_num();
     const int num_threads = omp_get_num_threads();
     if (thread_id == num_threads / 2) {
-      printf("%3u%% (thread: %i/%i)\r", (uint32_t)(100.0f * (n - thread_id * (image_height * image_width / num_threads)) /
-                                   (image_height * image_width / num_threads)), thread_id, num_threads);
-      fflush(stdout);
+      fprintf(stderr, "%3u%% (thread: %i/%i)\r",
+              (uint32_t)(100.0f *
+                         (n - thread_id *
+                                  (image_height * image_width / num_threads)) /
+                         (image_height * image_width / num_threads)),
+              thread_id, num_threads);
     }
     size_t i = n / image_width;
     size_t j = n % image_width;
@@ -181,8 +187,8 @@ int main() {
       const float v =
           ((image_height - 1 - i) + random_f()) / (image_height - 1);
       ray_t r = camera_get_ray(&cam, u, v);
-      const colour_t ray_col = ray_colour(r, &world, max_depth);
-      pixel_colour = vec_add_v(&pixel_colour, 1, (const vec_t *[]){&ray_col});
+      const colour_t ray_col = ray_colour(&r, &world, max_depth);
+      pixel_colour = vec_add_v(&pixel_colour, 1, (const vec_t[]){ray_col});
     }
     pixels[n] = pixel_colour;
   }
@@ -191,8 +197,8 @@ int main() {
   // Write
   FILE *image_file = fopen("image.ppm", "w");
   char buf[128] = {0};
-  const size_t buf_len =
-      snprintf(buf, sizeof(buf), "P3\n%u %u\n255\n", image_width, image_height);
+  const size_t buf_len = snprintf(buf, sizeof(buf), "P3\n%zu %zu\n255\n",
+                                  image_width, image_height);
   fwrite(buf, buf_len, 1, image_file);
   memset(buf, 0, sizeof(buf));
   for (size_t n = 0; n < (size_t)(image_height * image_width); ++n) {
@@ -200,8 +206,6 @@ int main() {
     write_colour(image_file, &pixel_colour, samples_per_pixel);
   }
   fclose(image_file);
-
-  free(pixels);
 
   return EXIT_SUCCESS;
 }
