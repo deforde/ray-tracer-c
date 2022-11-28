@@ -12,9 +12,7 @@ bool lambertian_scatter(void *object, __attribute__((unused)) ray_t *r_in,
                         ray_t *scattered) {
   lambertian_t *lambertian = (lambertian_t *)object;
 
-  const vec_t rand_unit = vec_random_unit();
-  vec_t scatter_direction =
-      vec_add_v(&rec->normal, 1, (const vec_t[]){rand_unit});
+  vec_t scatter_direction = VEC_ADD_V(rec->normal, vec_random_unit());
 
   if (vec_near_zero(&scatter_direction))
     scatter_direction = rec->normal;

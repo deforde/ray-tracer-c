@@ -23,11 +23,12 @@
 #define MAX_NUM_RANDOM_SPHERES 23 * 23
 #define TOTAL_NUM_OBJECTS MAX_NUM_RANDOM_SPHERES + 4
 
-#define ASPECT_RATIO (3 / 2)
 #define IMAGE_WIDTH 1200
-#define IMAGE_HEIGHT IMAGE_WIDTH / ASPECT_RATIO
+#define IMAGE_HEIGHT (IMAGE_WIDTH * 2 / 3)
 
-colour_t ray_colour(ray_t *r, hittable_list_t *world, int32_t depth) {
+static colour_t pixels[IMAGE_WIDTH * IMAGE_HEIGHT] = {0};
+
+static colour_t ray_colour(ray_t *r, hittable_list_t *world, int32_t depth) {
   colour_t zero_colour = {.x = 0, .y = 0, .z = 0};
   if (depth <= 0)
     return zero_colour;
@@ -38,8 +39,7 @@ colour_t ray_colour(ray_t *r, hittable_list_t *world, int32_t depth) {
     colour_t attenuation = {.x = 0, .y = 0, .z = 0};
 
     if (material_scatter(rec.material, r, &rec, &attenuation, &scattered)) {
-      const colour_t ray_col = ray_colour(&scattered, world, depth - 1);
-      return vec_mul_v(&attenuation, 1, (const vec_t[]){ray_col});
+      return VEC_MUL_V(attenuation, ray_colour(&scattered, world, depth - 1));
     }
 
     return zero_colour;
@@ -48,23 +48,21 @@ colour_t ray_colour(ray_t *r, hittable_list_t *world, int32_t depth) {
   vec_t unit_dir = vec_unit(&r->dir);
   const float t = 0.5f * (unit_dir.y + 1.0f);
   colour_t a = {.x = 1.0f, .y = 1.0f, .z = 1.0f};
-  a = vec_mul_f(&a, 1.0f - t);
   colour_t b = {.x = 0.5f, .y = 0.7f, .z = 1.0f};
-  b = vec_mul_f(&b, t);
-  return vec_add_v(&a, 1, (const vec_t[]){b});
+  return VEC_ADD_V(vec_mul_f(&a, 1.0f - t), vec_mul_f(&b, t));
 }
 
 int main() {
   // Image
-  const float aspect_ratio = ASPECT_RATIO;
+  const float aspect_ratio = 3.f / 2.f;
   const size_t image_width = IMAGE_WIDTH;
   const size_t image_height = IMAGE_HEIGHT;
   const size_t samples_per_pixel = 100;
   const int32_t max_depth = 50;
 
   // World
-  hittable_list_t world;
-  hittable_list_init(&world);
+  hittable_list_t world = {0};
+  // hittable_list_init(&world);
 
   lambertian_t lambertians[TOTAL_NUM_OBJECTS];
   size_t n_lambertians = 0;
@@ -116,14 +114,12 @@ int main() {
           .x = a + 0.9f * random_f(), .y = 0.2f, .z = b + 0.9f * random_f()};
       const point_t p = {.x = 4.0f, .y = 0.2f, .z = 0.0f};
 
-      const vec_t x = vec_sub_v(&centre, 1, (const vec_t[]){p});
+      const vec_t x = VEC_SUB_V(centre, p);
       if (vec_length(&x) > 0.9f) {
         if (choose_mat < 0.8) {
           // diffuse
-          const vec_t rand_1 = vec_random();
-          const vec_t rand_2 = vec_random();
           lambertian_init(&lambertians[n_lambertians],
-                          vec_mul_v(&rand_1, 1, (const vec_t[]){rand_2}));
+                          VEC_MUL_V(vec_random(), vec_random()));
           sphere_init(&spheres[n_spheres], centre, 0.2f,
                       (material_t *)&lambertians[n_lambertians]);
           ++n_lambertians;
@@ -164,8 +160,6 @@ int main() {
               dist_to_focus);
 
   // Render
-  colour_t pixels[IMAGE_WIDTH * IMAGE_HEIGHT] = {0};
-
   printf("Rendering...\n");
 #pragma omp parallel for
   for (size_t n = 0; n < (size_t)(image_height * image_width); ++n) {
@@ -187,8 +181,7 @@ int main() {
       const float v =
           ((image_height - 1 - i) + random_f()) / (image_height - 1);
       ray_t r = camera_get_ray(&cam, u, v);
-      const colour_t ray_col = ray_colour(&r, &world, max_depth);
-      pixel_colour = vec_add_v(&pixel_colour, 1, (const vec_t[]){ray_col});
+      pixel_colour = VEC_ADD_V(pixel_colour, ray_colour(&r, &world, max_depth));
     }
     pixels[n] = pixel_colour;
   }

@@ -7,56 +7,56 @@
 
 #define NEAR_ZERO_APPROX 1e-8f
 
-vec_t vec_add_v(const vec_t *r, size_t n, const vec_t x[]) {
-  vec_t v = *r;
+vec_t vec_add_v(size_t n, vec_t x[]) {
+  vec_t *v = &x[0];
 
-  for (size_t i = 0; i < n; ++i) {
+  for (size_t i = 1; i < n; ++i) {
     const vec_t *u = &x[i];
-    v.x += u->x;
-    v.y += u->y;
-    v.z += u->z;
+    v->x += u->x;
+    v->y += u->y;
+    v->z += u->z;
   }
 
-  return v;
+  return *v;
 }
 
-vec_t vec_sub_v(const vec_t *r, size_t n, const vec_t x[]) {
-  vec_t v = *r;
+vec_t vec_sub_v(size_t n, vec_t x[]) {
+  vec_t *v = &x[0];
 
-  for (size_t i = 0; i < n; ++i) {
+  for (size_t i = 1; i < n; ++i) {
     const vec_t *u = &x[i];
-    v.x -= u->x;
-    v.y -= u->y;
-    v.z -= u->z;
+    v->x -= u->x;
+    v->y -= u->y;
+    v->z -= u->z;
   }
 
-  return v;
+  return *v;
 }
 
-vec_t vec_mul_v(const vec_t *r, size_t n, const vec_t x[]) {
-  vec_t v = *r;
+vec_t vec_mul_v(size_t n, vec_t x[]) {
+  vec_t *v = &x[0];
 
-  for (size_t i = 0; i < n; ++i) {
+  for (size_t i = 1; i < n; ++i) {
     const vec_t *u = &x[i];
-    v.x *= u->x;
-    v.y *= u->y;
-    v.z *= u->z;
+    v->x *= u->x;
+    v->y *= u->y;
+    v->z *= u->z;
   }
 
-  return v;
+  return *v;
 }
 
-vec_t vec_div_v(const vec_t *r, size_t n, const vec_t x[]) {
-  vec_t v = *r;
+vec_t vec_div_v(size_t n, vec_t x[]) {
+  vec_t *v = &x[0];
 
-  for (size_t i = 0; i < n; ++i) {
+  for (size_t i = 1; i < n; ++i) {
     const vec_t *u = &x[i];
-    v.x /= u->x;
-    v.y /= u->y;
-    v.z /= u->z;
+    v->x /= u->x;
+    v->y /= u->y;
+    v->z /= u->z;
   }
 
-  return v;
+  return *v;
 }
 
 vec_t vec_add_f(const vec_t *u, float f) {
@@ -167,8 +167,7 @@ bool vec_near_zero(const vec_t *v) {
 }
 
 vec_t vec_reflect(const vec_t *v, const vec_t *n) {
-  const vec_t a = vec_mul_f(n, 2.0f * vec_dot(v, n));
-  return vec_sub_v(v, 1, (const vec_t[]){a});
+  return VEC_SUB_V(*v, vec_mul_f(n, 2.0f * vec_dot(v, n)));
 }
 
 vec_t vec_refract(const vec_t *uv, const vec_t *n, float etai_over_etat) {
@@ -176,12 +175,11 @@ vec_t vec_refract(const vec_t *uv, const vec_t *n, float etai_over_etat) {
   const float dot_prod = vec_dot(&x, n);
   const float cos_theta = dot_prod < 1.0f ? dot_prod : 1.0f;
 
-  vec_t a = vec_mul_f(n, cos_theta);
-  vec_t b = vec_add_v(uv, 1, (const vec_t[]){a});
+  vec_t b = VEC_ADD_V(*uv, vec_mul_f(n, cos_theta));
 
   const vec_t r_out_perp = vec_mul_f(&b, etai_over_etat);
-  const vec_t r_out_parallel =
-      vec_mul_f(n, -sqrtf(fabsf(1.0f - vec_length_squared(&r_out_perp))));
 
-  return vec_add_v(&r_out_perp, 1, (const vec_t[]){r_out_parallel});
+  return VEC_ADD_V(
+      r_out_perp,
+      vec_mul_f(n, -sqrtf(fabsf(1.0f - vec_length_squared(&r_out_perp)))));
 }

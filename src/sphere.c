@@ -16,7 +16,7 @@ bool sphere_hit(void *object, ray_t *r, float t_min, float t_max,
                 hit_record_t *rec) {
   sphere_t *sphere = (sphere_t *)object;
 
-  const vec_t oc = vec_sub_v(&r->orig, 1, (const vec_t[]){sphere->centre});
+  const vec_t oc = VEC_SUB_V(r->orig, sphere->centre);
   const float a = vec_length_squared(&r->dir);
   const float half_b = vec_dot(&oc, &r->dir);
   const float c = vec_length_squared(&oc) - sphere->radius * sphere->radius;
@@ -37,7 +37,7 @@ bool sphere_hit(void *object, ray_t *r, float t_min, float t_max,
 
   rec->t = root;
   rec->p = ray_at(r, rec->t);
-  const vec_t v = vec_sub_v(&rec->p, 1, (const vec_t[]){sphere->centre});
+  const vec_t v = VEC_SUB_V(rec->p, sphere->centre);
   const vec_t outward_normal = vec_div_f(&v, sphere->radius);
   set_face_normal(rec, r, &outward_normal);
   rec->material = sphere->material;
